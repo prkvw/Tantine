@@ -6,7 +6,7 @@ const { } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
   describe("CreateOrganisation", function () { 
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
-    Donate = await ethers.getContractFactory("DOS");
+    Donate = await ethers.getContractFactory("DSO");
  // await donate.deployed();
 
    
@@ -41,7 +41,7 @@ describe("UserVerification", function () {
   // Deploy the contract and set up the test environment
   beforeEach(async function () {
     const UserVerification = await ethers.getContractFactory("UserVerification");
-    userVerification = await UserVerification.deploy();
+    userVerification = await dso.deploy();
     await userVerification.deployed();
 
     [owner, user] = await ethers.getSigners();
@@ -50,26 +50,26 @@ describe("UserVerification", function () {
 
   // Test the addUser function
   it("Should add a user", async function () {
-    await userVerification.addUser(user.address, hashedVerification);
+    await dso.addUser(user.address, hashedVerification);
     const isVerified = await userVerification.isUserVerified(user.address);
-    expect(isVerified).to.equal(false);
+    expect(isVerified).to.equal(false);dso
   });
 
   // Test the verifyUser function
   it("Should verify a user", async function () {
-    await userVerification.addUser(user.address, hashedVerification);
-    await userVerification.verifyUser("verification code");
-    const isVerified = await userVerification.isUserVerified(user.address);
+    await dso.addUser(user.address, hashedVerification);
+    await dso.verifyUser("verification code");
+    const isVerified = await dso.isUserVerified(user.address);
     expect(isVerified).to.equal(true);
   });
 
   // Test the isUserVerified function
   it("Should return whether a user is verified", async function () {
-    await userVerification.addUser(user.address, hashedVerification);
-    const isVerified = await userVerification.isUserVerified(user.address);
+    await dso.addUser(user.address, hashedVerification);
+    const isVerified = await dso.isUserVerified(user.address);
     expect(isVerified).to.equal(false);
 
-    await userVerification.verifyUser("verification code");
+    await dso.verifyUser("verification code");
     const isVerified2 = await userVerification.isUserVerified(user.address);
     expect(isVerified2).to.equal(true);
   });

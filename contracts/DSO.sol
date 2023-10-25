@@ -1,21 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
-using ECDSA for bytes32;
+//using ECDSA for bytes32;
 
-struct Organization {
-        address creator;
-        string name;
-        string about;        
-        uint createdTimestamp;
-    }
-    //struct Owners
 
-    Organization[] public organizations;
-
-  mapping(address => bool) userVerified;
-    mapping(address => bytes32) userCodes;
-    address owner;
-
+contract DSO {
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function");
         _;
@@ -24,6 +12,19 @@ struct Organization {
     constructor() {
         owner = msg.sender;
     }
+    struct Organization {
+        address creator;
+        string name;
+        string about;        
+        uint createdTimestamp;
+    }
+    //struct Owners
+
+    Organization[] organizations;
+
+  mapping(address => bool) userVerified;
+    mapping(address => bytes32) userCodes;
+    address owner;
 
     function addUser(address user, bytes32 hashedVerification) public onlyOwner {
         userVerified[user] = false;
@@ -61,8 +62,6 @@ struct Organization {
             creator: msg.sender,
             name: _name,
             about: _about,
-            goalAmount: _goalAmount,
-            currentAmount: 0,
             createdTimestamp: block.timestamp
         });
 
@@ -87,3 +86,4 @@ struct Organization {
     function getAllOrganizations() public view returns (Organization[] memory) {
         return organizations;
     }
+}
