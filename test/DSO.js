@@ -1,10 +1,9 @@
-const {
-   
-  } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+const { } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
   const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
-  const { expect } = require("chai");
 
-  describe("CreateOrganisation", function () { }
+  describe("CreateOrganisation", function () { 
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
     Donate = await ethers.getContractFactory("DOS");
@@ -12,7 +11,7 @@ const {
 
    
 
-  }))
+  })
 
   it("should create an organization", async function () {
     const orgName = "Example Organization";
@@ -28,4 +27,50 @@ const {
     expect(org.creator).to.equal(owner.address);
     expect(org.name).to.equal(orgName);
 
-    
+  })});
+
+
+
+// Define the test suite
+describe("UserVerification", function () {
+  let userVerification;
+  let owner;
+  let user;
+  let hashedVerification;
+
+  // Deploy the contract and set up the test environment
+  beforeEach(async function () {
+    const UserVerification = await ethers.getContractFactory("UserVerification");
+    userVerification = await UserVerification.deploy();
+    await userVerification.deployed();
+
+    [owner, user] = await ethers.getSigners();
+    hashedVerification = ethers.utils.sha256("verification code");
+  });
+
+  // Test the addUser function
+  it("Should add a user", async function () {
+    await userVerification.addUser(user.address, hashedVerification);
+    const isVerified = await userVerification.isUserVerified(user.address);
+    expect(isVerified).to.equal(false);
+  });
+
+  // Test the verifyUser function
+  it("Should verify a user", async function () {
+    await userVerification.addUser(user.address, hashedVerification);
+    await userVerification.verifyUser("verification code");
+    const isVerified = await userVerification.isUserVerified(user.address);
+    expect(isVerified).to.equal(true);
+  });
+
+  // Test the isUserVerified function
+  it("Should return whether a user is verified", async function () {
+    await userVerification.addUser(user.address, hashedVerification);
+    const isVerified = await userVerification.isUserVerified(user.address);
+    expect(isVerified).to.equal(false);
+
+    await userVerification.verifyUser("verification code");
+    const isVerified2 = await userVerification.isUserVerified(user.address);
+    expect(isVerified2).to.equal(true);
+  });
+});

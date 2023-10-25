@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
+using ECDSA for bytes32;
 
 struct Organization {
         address creator;
@@ -10,12 +11,42 @@ struct Organization {
     //struct Owners
 
     Organization[] public organizations;
-    mapping(address => Donation[]) organizationsToDonation;
+
+  mapping(address => bool) userVerified;
+    mapping(address => bytes32) userCodes;
+    address owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can call this function");
+        _;
+    }
 
     constructor() {
         owner = msg.sender;
     }
-//
+
+    function addUser(address user, bytes32 hashedVerification) public onlyOwner {
+        userVerified[user] = false;
+        userCodes[user] = hashedVerification;
+    }
+
+    function verifyUser(bytes32 verificationCode) public {
+        require(userVerified[msg.sender] == false, "User is already verified");
+        require(sha256(abi.encodePacked(verificationCode)) == userCodes[msg.sender], "Verification code is incorrect");
+        userVerified[msg.sender] = true;
+    }
+
+    function isUserVerified(address user) public view returns (bool) {
+        return userVerified[user];
+    }
+
+//verify
+
+// function _verify(bytes32 data, address account) pure returns (bool) {
+//     return keccack256(data)
+//         .toEthSignedMessageHash()
+//         .recover(signature) == account;
+// }
 
 // Create organisation
     function createOrganization(
