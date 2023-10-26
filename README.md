@@ -10,21 +10,20 @@ We are using technology to automate collections and improve business performance
 
 
 LIMIT CONDITION
-## NO CRYPTO PAYMENTS
 
 ## SOLUTION KPI's
 - Grow Customer Base
-- Improved payment systems, but not CRYPTO
+- Improved payment systems
 - Streamlining KYC
-- Remittance
 - Financial Inclusion 
 - One more thing...
 
 ## KEY FEATURES
 
-- Signup 
+- Signup / Add User
 - Account Verification
 - Create Organisation
+- Countdown Timer / Timeleft
 
 ## Contributors
 Team 19
