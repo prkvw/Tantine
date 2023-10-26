@@ -22,7 +22,7 @@ contract DSO {
 
     Organization[] organizations;
 
-  mapping(address => bool) userVerified;
+    mapping(address => bool) userVerified;
     mapping(address => bytes32) userCodes;
     address owner;
 
