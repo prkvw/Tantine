@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
-//using ECDSA for bytes32;
-
 
 contract DSO {
     modifier onlyOwner() {
@@ -12,18 +10,18 @@ contract DSO {
     constructor() {
         owner = msg.sender;
     }
+
     struct Organization {
         address creator;
         string name;
-        string about;        
+        string about;
         uint createdTimestamp;
     }
-    //struct Owners
 
     Organization[] organizations;
-
     mapping(address => bool) userVerified;
     mapping(address => bytes32) userCodes;
+    mapping(address => bool) loggedInUsers;  // New mapping to keep track of logged-in users
     address owner;
 
     function addUser(address user, bytes32 hashedVerification) public onlyOwner {
@@ -41,22 +39,27 @@ contract DSO {
         return userVerified[user];
     }
 
-//verify
+    // New login function
+    function login() public {
+        require(userVerified[msg.sender] == true, "User is not verified");
+        loggedInUsers[msg.sender] = true;
+    }
 
-// function _verify(bytes32 data, address account) pure returns (bool) {
-//     return keccack256(data)
-//         .toEthSignedMessageHash()
-//         .recover(signature) == account;
-// }
+    // // New logout function
+    // function logout() public {
+    //     loggedInUsers[msg.sender] = false;
+    // }
 
-// Create organisation
+    // New function to check if a user is logged in
+    function isUserLoggedIn(address user) public view returns (bool) {
+        return loggedInUsers[user];
+    }
+
     function createOrganization(
         string memory _name,
-        string memory _about,
-        uint _goalAmount
+        string memory _about
     ) public {
         require(bytes(_name).length > 0, "Organization name cannot be empty");
-        require(_goalAmount > 0, "Goal amount must be greater than 0");
 
         Organization memory newOrganization = Organization({
             creator: msg.sender,
@@ -68,21 +71,16 @@ contract DSO {
         organizations.push(newOrganization);
     }
 
-    // get organisations count
-    function getOrganiationsCount() public view returns (uint) {
+    function getOrganizationsCount() public view returns (uint) {
         return organizations.length;
     }
 
-    // get single organisation
-    function getOrganization(
-        uint index
-    ) public view returns (Organization memory) {
+    function getOrganization(uint index) public view returns (Organization memory) {
         require(index < organizations.length, "Invalid index");
         Organization memory org = organizations[index];
-        return (org);
+        return org;
     }
 
-    // Get all organisations
     function getAllOrganizations() public view returns (Organization[] memory) {
         return organizations;
     }

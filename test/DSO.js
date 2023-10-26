@@ -1,76 +1,74 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
-  const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 
-  describe("CreateOrganisation", function () { 
-  beforeEach(async function () {
-    [owner] = await ethers.getSigners();
-    Donate = await ethers.getContractFactory("DSO");
- // await donate.deployed();
-
-   
-
-  })
-
-  it("should create an organization", async function () {
-    const orgName = "Example Organization";
-    const orgAbout = "This is an example organization";
-
-
-    await dso.createOrganization(orgName, orgAbout, orgGoalAmount);
-
-    const orgCount = await dso.getOrganiationsCount();
-    expect(orgCount).to.equal(1);
-
-    const org = await dso.getOrganization(0);
-    expect(org.creator).to.equal(owner.address);
-    expect(org.name).to.equal(orgName);
-
-  })});
-
-
-
-// Define the test suite
-describe("UserVerification", function () {
-  let userVerification;
+describe("DSO Contract", function () {
   let owner;
   let user;
-  let hashedVerification;
+  let dso;
 
-  // Deploy the contract and set up the test environment
-  beforeEach(async function () {
-    const UserVerification = await ethers.getContractFactory("UserVerification");
-    userVerification = await dso.deploy();
-    await userVerification.deployed();
-
+  before(async function () {
     [owner, user] = await ethers.getSigners();
-    hashedVerification = ethers.utils.sha256("verification code");
+    const DSOFactory = await ethers.getContractFactory("DSO");
+    dso = await DSOFactory.deploy();
+    // await dso.deployed();
   });
 
-  // Test the addUser function
-  it("Should add a user", async function () {
-    await dso.addUser(user.address, hashedVerification);
-    const isVerified = await userVerification.isUserVerified(user.address);
-    expect(isVerified).to.equal(false);dso
+  it("should create an organization", async function () {
+    await dso.createOrganization("Example Organization", "This is an example organization");
+
+    const orgCount = await dso.getOrganizationsCount();
+    expect(Number(orgCount)).to.equal(1);
+
+    const org = await dso.getOrganization(0);
+    expect(org.creator).to.equal(await owner.getAddress());
+    expect(org.name).to.equal("Example Organization");
+    expect(org.about).to.equal("This is an example organization");
   });
 
-  // Test the verifyUser function
-  it("Should verify a user", async function () {
-    await dso.addUser(user.address, hashedVerification);
-    await dso.verifyUser("verification code");
-    const isVerified = await dso.isUserVerified(user.address);
-    expect(isVerified).to.equal(true);
+  it("should add and verify a user", async function () {
+    const verificationCode = "verification code";
+    const hashedVerification = ethers.keccak256(ethers.toUtf8Bytes(verificationCode));
+
+    await dso.addUser(await user.getAddress(), hashedVerification);
+    const isVerifiedBefore = await dso.isUserVerified(await user.getAddress());
+    expect(isVerifiedBefore).to.equal(false);
+
+    await dso.verifyUser(hashedVerification);
+    const isVerifiedAfter = await dso.isUserVerified(await user.getAddress());
+    expect(isVerifiedAfter).to.equal(true);
   });
 
-  // Test the isUserVerified function
-  it("Should return whether a user is verified", async function () {
-    await dso.addUser(user.address, hashedVerification);
-    const isVerified = await dso.isUserVerified(user.address);
-    expect(isVerified).to.equal(false);
+  it("should allow user login and logout", async function () {
+    const verificationCode = "verification code";
+    const hashedVerification = ethers.keccak256(ethers.toUtf8Bytes(verificationCode));
 
-    await dso.verifyUser("verification code");
-    const isVerified2 = await userVerification.isUserVerified(user.address);
-    expect(isVerified2).to.equal(true);
+    await dso.addUser(await user.getAddress(), hashedVerification);
+    await dso.verifyUser(hashedVerification);
+
+    const isLoggedInBefore = await dso.isUserLoggedIn(await user.getAddress());
+    expect(isLoggedInBefore).to.equal(false);
+
+    await dso.login();
+    const isLoggedInAfterLogin = await dso.isUserLoggedIn(await user.getAddress());
+    expect(isLoggedInAfterLogin).to.equal(true);
+
+    await dso.logout();
+    const isLoggedInAfterLogout = await dso.isUserLoggedIn(await user.getAddress());
+    expect(isLoggedInAfterLogout).to.equal(false);
+  });
+
+  it("should not allow unverified user to login", async function () {
+    const isLoggedInBefore = await dso.isUserLoggedIn(await user.getAddress());
+    expect(isLoggedInBefore).to.equal(false);
+
+    // Try to log in without verifying
+    try {
+      await dso.login();
+    } catch (error) {
+      expect(error.message).to.contain("User is not verified");
+    }
+
+    const isLoggedInAfterFailedLogin = await dso.isUserLoggedIn(await user.getAddress());
+    expect(isLoggedInAfterFailedLogin).to.equal(false);
   });
 });
