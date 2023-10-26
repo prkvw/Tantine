@@ -29,29 +29,53 @@ const { } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 
   })});
 
-
+// Import the necessary libraries
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
 // Define the test suite
-describe("UserVerification", function () {
-  let userVerification;
+describe("CountdownTimer", function () {
+  let countdownTimer;
+  let owner;
+
+
+  // Test the startTimer function
+  it("Should start the timer", async function () {
+    const duration = 60; // 1 minute
+    await countdownTimer.startTimer(duration);
+    const endTime = await countdownTimer.endTime();
+    expect(endTime).to.equal(Math.floor(Date.now() / 1000) + duration);
+  });
+
+  // Test the getTimeLeft function
+  it("Should return the time left in the countdown", async function () {
+    const duration = 60; // 1 minute
+    await countdownTimer.startTimer(duration);
+    const timeLeft = await countdownTimer.getTimeLeft();
+    expect(timeLeft).to.be.within(duration - 1, duration);
+  });
+
+  // Test the getTimeLeft function after the countdown has ended
+  it("Should return 0 after the countdown has ended", async function () {
+    const duration = 1; // 1 second
+    await countdownTimer.startTimer(duration);
+    await new Promise(resolve => setTimeout(resolve, duration * 1000)); // Wait for the countdown to end
+    const timeLeft = await countdownTimer.getTimeLeft();
+    expect(timeLeft).to.equal(0);
+  });
+});
+
+// User Verification
+describe("VerifyUser", function () {
   let owner;
   let user;
   let hashedVerification;
 
-  // Deploy the contract and set up the test environment
-  beforeEach(async function () {
-    const UserVerification = await ethers.getContractFactory("UserVerification");
-    userVerification = await dso.deploy();
-    await userVerification.deployed();
-
-    [owner, user] = await ethers.getSigners();
-    hashedVerification = ethers.utils.sha256("verification code");
-  });
 
   // Test the addUser function
   it("Should add a user", async function () {
     await dso.addUser(user.address, hashedVerification);
-    const isVerified = await userVerification.isUserVerified(user.address);
+    const isVerified = await dso.isUserVerified(user.address);
     expect(isVerified).to.equal(false);dso
   });
 
@@ -70,7 +94,8 @@ describe("UserVerification", function () {
     expect(isVerified).to.equal(false);
 
     await dso.verifyUser("verification code");
-    const isVerified2 = await userVerification.isUserVerified(user.address);
+    const isVerified2 = await dso.isUserVerified(user.address);
     expect(isVerified2).to.equal(true);
   });
+
 });

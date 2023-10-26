@@ -85,5 +85,20 @@ contract DSO {
     // Get all organisations
     function getAllOrganizations() public view returns (Organization[] memory) {
         return organizations;
+        
+    }
+    uint256 public endTime;
+
+    function startTimer(uint256 duration) public {
+        endTime = block.timestamp + duration;
+    }
+
+    function getRemainingTime() public view returns (uint256) {
+        if (block.timestamp >= endTime) {
+            return 0;
+        } else {
+            return endTime - block.timestamp;
+        }
     }
 }
+
