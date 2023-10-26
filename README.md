@@ -27,4 +27,9 @@ LIMIT CONDITION
 - Create Organisation
 
 ## Contributors
-Team 19
+Team 19:
+- SB
+- Fred Osege
+- Balaraba 
+- Faddal
+- Kaba
